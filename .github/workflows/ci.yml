@@ -59,6 +59,7 @@ jobs:
           [ "$count" -eq 20 ]
           test -d ~/.pi/agent/npm/node_modules/pi-mcp-adapter
           test -d ~/.pi/agent/npm/node_modules/pi-web-access
+          test -d ~/.pi/agent/npm/node_modules/pi-observational-memory
       - name: Paseo configs must be restored
         run: |
           test -f ~/.paseo/config.json
