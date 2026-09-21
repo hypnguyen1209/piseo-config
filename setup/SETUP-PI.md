@@ -37,7 +37,13 @@ This writes:
 | `pi/settings.json` | `~/.pi/agent/settings.json` |
 | `pi/models.json` | `~/.pi/agent/models.json` |
 | `pi/models-store.json` | `~/.pi/agent/models-store.json` |
-| `pi/packages/` | `~/.pi/agent/npm/` (full plugin packages, incl. `node_modules`) |
+| `pi/packages/package.json` + lockfile + `node_modules` | `~/.pi/agent/npm/` (working plugin install) |
+
+`pi/packages/<name>/` (git submodules of the pifydev source repos) are **not** restored to the live machine — they are a reference/customization playground inside this repo only. To materialize them after cloning:
+
+```bash
+git submodule update --init
+```
 
 ## 4. Secrets (NOT in the repo — do manually)
 
@@ -65,7 +71,11 @@ pi
   cd ~/.pi/agent/npm && bun install
   ```
 
-## 6. Going the other way (backup)
+## 6. Customizing a plugin (optional)
+
+Every plugin's source is a git submodule in `pi/packages/<name>/`, pinned to the installed version. Full workflow (fork → edit → build into live pi) is in [`pi/packages/README.md`](../pi/packages/README.md).
+
+## 7. Going the other way (backup)
 
 After changing config/plugins on this machine:
 
@@ -74,4 +84,4 @@ cd piseo-config
 bun scripts/backup.ts --push
 ```
 
-The script deletes `pi/packages/.gitignore` after copying — the source npm folder ships an ignore-all `.gitignore` that would otherwise keep `node_modules` out of the commit.
+The script syncs only `package.json`, `package-lock.json` and `node_modules` — the source submodules in `pi/packages/` stay untouched.

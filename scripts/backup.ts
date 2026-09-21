@@ -3,8 +3,11 @@
  * backup.ts — Copy live configs from THIS machine into the repo.
  * Run:  bun scripts/backup.ts [--push]
  *   --push : also stage, commit and push automatically
+ *
+ * Note: pi/packages/<name>/ are git submodules (pifydev sources) — they are
+ * repo-only and are NEVER synced to or from the live ~/.pi/agent/npm folder.
  */
-import { cpSync, existsSync, rmSync, statSync } from "node:fs";
+import { cpSync, existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { homedir, platform } from "node:os";
 
@@ -22,7 +25,10 @@ const mappings: Array<[string, string]> = [
   [join(home, ".pi", "agent", "settings.json"), join(repoDir, "pi", "settings.json")],
   [join(home, ".pi", "agent", "models.json"), join(repoDir, "pi", "models.json")],
   [join(home, ".pi", "agent", "models-store.json"), join(repoDir, "pi", "models-store.json")],
-  [join(home, ".pi", "agent", "npm"), join(repoDir, "pi", "packages")],
+  // pi packages — only the npm-project bits; submodule sources stay untouched
+  [join(home, ".pi", "agent", "npm", "package.json"), join(repoDir, "pi", "packages", "package.json")],
+  [join(home, ".pi", "agent", "npm", "package-lock.json"), join(repoDir, "pi", "packages", "package-lock.json")],
+  [join(home, ".pi", "agent", "npm", "node_modules"), join(repoDir, "pi", "packages", "node_modules")],
   // paseo
   [join(home, ".paseo", "config.json"), join(repoDir, "paseo", "config.json")],
   [join(home, ".paseo", "projects", "projects.json"), join(repoDir, "paseo", "projects.json")],
@@ -38,12 +44,8 @@ for (const [src, dest] of mappings) {
     continue;
   }
   cpSync(src, dest, { recursive: true, force: true });
-  // The source npm folder ships its own ignore-all .gitignore which would
-  // prevent node_modules from being committed — drop it from the repo copy.
-  const innerGitignore = join(dest, ".gitignore");
-  if (statSync(src).isDirectory() && existsSync(innerGitignore)) rmSync(innerGitignore);
   const kind = statSync(src).isDirectory() ? "dir " : "file";
-  console.log(`  ✓ [${kind}] ${src} -> ${dest.replace(repoDir + "\\", "").replace(repoDir + "/", "")}`);
+  console.log(`  ✓ [${kind}] ${src.replace(home, "~")} -> ${dest.replace(repoDir, ".")}`);
   ok++;
 }
 console.log(`\n${ok}/${mappings.length} items copied.`);

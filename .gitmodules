@@ -1,0 +1,60 @@
+[submodule "pi/packages/ask-question"]
+	path = pi/packages/ask-question
+	url = https://github.com/pifydev/ask-question.git
+[submodule "pi/packages/autopilot"]
+	path = pi/packages/autopilot
+	url = https://github.com/pifydev/autopilot.git
+[submodule "pi/packages/btw"]
+	path = pi/packages/btw
+	url = https://github.com/pifydev/btw.git
+[submodule "pi/packages/compact"]
+	path = pi/packages/compact
+	url = https://github.com/pifydev/compact.git
+[submodule "pi/packages/goal"]
+	path = pi/packages/goal
+	url = https://github.com/pifydev/goal.git
+[submodule "pi/packages/memory"]
+	path = pi/packages/memory
+	url = https://github.com/pifydev/memory.git
+[submodule "pi/packages/plan-mode"]
+	path = pi/packages/plan-mode
+	url = https://github.com/pifydev/plan-mode.git
+[submodule "pi/packages/pretty"]
+	path = pi/packages/pretty
+	url = https://github.com/pifydev/pretty.git
+[submodule "pi/packages/recall"]
+	path = pi/packages/recall
+	url = https://github.com/pifydev/recall.git
+[submodule "pi/packages/search"]
+	path = pi/packages/search
+	url = https://github.com/pifydev/search.git
+[submodule "pi/packages/shell-background"]
+	path = pi/packages/shell-background
+	url = https://github.com/pifydev/shell-background.git
+[submodule "pi/packages/skills"]
+	path = pi/packages/skills
+	url = https://github.com/pifydev/skills.git
+[submodule "pi/packages/subagent"]
+	path = pi/packages/subagent
+	url = https://github.com/pifydev/subagent.git
+[submodule "pi/packages/swarm"]
+	path = pi/packages/swarm
+	url = https://github.com/pifydev/swarm.git
+[submodule "pi/packages/task"]
+	path = pi/packages/task
+	url = https://github.com/pifydev/task.git
+[submodule "pi/packages/todo"]
+	path = pi/packages/todo
+	url = https://github.com/pifydev/todo.git
+[submodule "pi/packages/usage"]
+	path = pi/packages/usage
+	url = https://github.com/pifydev/usage.git
+[submodule "pi/packages/workflow"]
+	path = pi/packages/workflow
+	url = https://github.com/pifydev/workflow.git
+[submodule "pi/packages/worktree"]
+	path = pi/packages/worktree
+	url = https://github.com/pifydev/worktree.git
+[submodule "pi/packages/yolo"]
+	path = pi/packages/yolo
+	url = https://github.com/pifydev/yolo.git

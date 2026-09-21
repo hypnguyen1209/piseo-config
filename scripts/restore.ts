@@ -2,6 +2,10 @@
 /**
  * restore.ts — Restore configs from the repo onto THIS machine (new machine).
  * Run:  bun scripts/restore.ts
+ *
+ * Note: pi/packages/<name>/ are git submodules (pifydev plugin sources) kept
+ * for reference/customization — restore only copies the npm-project bits
+ * (package.json, lockfile, node_modules) to the live folder.
  */
 import { cpSync, existsSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -21,7 +25,10 @@ const mappings: Array<[string, string]> = [
   [join(repoDir, "pi", "settings.json"), join(home, ".pi", "agent", "settings.json")],
   [join(repoDir, "pi", "models.json"), join(home, ".pi", "agent", "models.json")],
   [join(repoDir, "pi", "models-store.json"), join(home, ".pi", "agent", "models-store.json")],
-  [join(repoDir, "pi", "packages"), join(home, ".pi", "agent", "npm")],
+  // pi packages — npm-project bits only; submodule sources stay in the repo
+  [join(repoDir, "pi", "packages", "package.json"), join(home, ".pi", "agent", "npm", "package.json")],
+  [join(repoDir, "pi", "packages", "package-lock.json"), join(home, ".pi", "agent", "npm", "package-lock.json")],
+  [join(repoDir, "pi", "packages", "node_modules"), join(home, ".pi", "agent", "npm", "node_modules")],
   // paseo
   [join(repoDir, "paseo", "config.json"), join(home, ".paseo", "config.json")],
   [join(repoDir, "paseo", "projects.json"), join(home, ".paseo", "projects", "projects.json")],
@@ -38,7 +45,7 @@ for (const [src, dest] of mappings) {
   }
   cpSync(src, dest, { recursive: true, force: true });
   const kind = statSync(src).isDirectory() ? "dir " : "file";
-  console.log(`  ✓ [${kind}] ${src.replace(repoDir + "\\", "").replace(repoDir + "/", "")} -> ${dest}`);
+  console.log(`  ✓ [${kind}] ${src.replace(repoDir, ".")} -> ${dest.replace(home, "~")}`);
   ok++;
 }
 console.log(`\n${ok}/${mappings.length} items restored.`);
@@ -47,4 +54,5 @@ console.log(`
 Finish manually (see README.md):
   1. pi auto-installs plugins from the packages/ folder on next start.
   2. Re-login pi auth and set the NINE_ROUTER_KEY environment variable.
-  3. Paseo generates a fresh daemon-keypair.json on first run — nothing to do.`);
+  3. Paseo generates a fresh daemon-keypair.json on first run — nothing to do.
+  4. Want to hack on plugin sources? They are git submodules in pi/packages/`);
