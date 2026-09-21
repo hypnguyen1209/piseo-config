@@ -1,98 +1,111 @@
 # piseo-config
 
-Backup toàn bộ cấu hình **pi coding agent** (config + plugins + models list) và **Paseo** (config) để đồng bộ giữa các máy.
+Backup of my full **pi coding agent** setup (config + plugins/packages + models list) and **Paseo** (config), so I can restore everything on a new machine.
 
-> ⚠️ **Repo này KHÔNG chứa secret** (API keys, keypair). Xem phần [Bảo mật](#-bảo-mật).
+> ⚠️ **This repo contains NO secrets** (no API keys, no keypairs). See [Security](#security).
 
-## Cấu trúc repo
+## Repository structure
 
 ```
 piseo-config/
 ├── README.md
 ├── scripts/
-│   ├── backup.sh          # Copy config từ máy vào repo này
-│   └── restore.sh         # Copy config từ repo này ra máy
+│   ├── backup.ts          # Copy configs from this machine into the repo (bun)
+│   └── restore.ts         # Restore configs from the repo onto this machine (bun)
 ├── pi/                    # ~/.pi/agent/
-│   ├── settings.json      # Config chính + danh sách packages/plugins (@pify/*)
-│   ├── models.json        # Custom providers & models list (9Router, OpenRouter, ...)
-│   └── models-store.json  # Models store của pi
+│   ├── settings.json      # Main config (theme, default provider/model, package list)
+│   ├── models.json        # Custom providers & models (9Router, OpenRouter, ...)
+│   ├── models-store.json  # pi models store
+│   └── packages/          # FULL plugin packages (npm project: package.json + node_modules)
+│                          # = ~/.pi/agent/npm (20 @pify/* plugins, committed as-is)
 └── paseo/
     ├── config.json              # ~/.paseo/config.json (daemon config)
-    ├── projects.json            # ~/.paseo/projects/projects.json (danh sách project)
+    ├── projects.json            # ~/.paseo/projects/projects.json
     ├── workspaces.json          # ~/.paseo/projects/workspaces.json
-    └── desktop-settings.json    # ~/AppData/Roaming/Paseo/desktop-settings.json
+    └── desktop-settings.json    # Paseo desktop app settings
 ```
 
-## Những gì được backup
+## What is backed up
 
-**Pi:**
-- `settings.json` — theme, default provider/model, và **danh sách 20 plugins** `@pify/*` (todo, memory, plan-mode, yolo, swarm, workflow, ...). Pi sẽ **tự động cài lại** các packages này từ danh sách trong `settings.json` khi khởi động, nên không cần backup `node_modules`.
-- `models.json` — toàn bộ custom providers/models (9Router local proxy, OpenRouter, CMC, MiniMax...).
-- `models-store.json` — models store.
+**pi**
+- `settings.json` — theme, default provider/model, package list.
+- `models.json` / `models-store.json` — all custom providers and models (9Router local proxy, OpenRouter, CMC, MiniMax, ...).
+- `packages/` — the **actual installed plugins**, committed as a full npm project (`~/.pi/agent/npm`): `package.json`, lockfile and `node_modules` with all 20 `@pify/*` packages (~2.4 MB). Restoring is instant — no reinstall needed. If you prefer a fresh install instead, run `bun install` (or `npm install`) inside the restored `npm` folder.
 
-**Paseo:**
+**paseo**
 - `config.json` — daemon listen address, CORS, relay settings.
-- `projects.json` / `workspaces.json` — danh sách project & workspace đã mở.
-- `desktop-settings.json` — settings của app desktop (release channel, notification...).
+- `projects.json` / `workspaces.json` — known projects & workspaces.
+- `desktop-settings.json` — desktop app settings (release channel, notifications, ...).
 
-## Những gì CỐ TÌNH loại trừ
+> Note: Paseo has no separate plugin/extension store of its own — its agent plugins are the pi packages above.
 
-| File | Lý do |
+## Intentionally excluded
+
+| File | Reason |
 |---|---|
-| `~/.pi/agent/auth.json` | Chứa API keys / token đăng nhập → secret |
-| `~/.paseo/daemon-keypair.json` | Keypair của daemon → secret |
-| `~/.pi/agent/npm/` | `node_modules` — pi tự cài lại từ `settings.json` |
-| `~/.pi/agent/sessions/`, `memory/` | Dữ liệu cá nhân theo máy |
-| `~/.paseo/daemon.log`, `*.pid`, `server-id`, `cli-client-id` | File runtime |
-| Cache Electron (`~/AppData/Roaming/Paseo/Cache`, ...) | Tự sinh lại |
+| `~/.pi/agent/auth.json` | Contains API keys / login tokens → secret |
+| `~/.paseo/daemon-keypair.json` | Daemon keypair → secret |
+| `~/.pi/agent/sessions/`, `memory/` | Per-machine personal data |
+| `~/.paseo/daemon.log`, `*.pid`, `server-id`, `cli-client-id` | Runtime files |
+| Electron caches (`~/AppData/Roaming/Paseo/Cache`, ...) | Regenerated automatically |
 
-## 🔐 Bảo mật
+## Security
 
-Repo **public** nên không chứa bất kỳ secret nào:
+The repo is **public**, so it must stay secret-free:
 
-- **Pi auth**: đăng nhập lại sau khi restore (`pi` → chạy lệnh login), hoặc tự quản lý auth bên ngoài.
-- **`NINE_ROUTER_KEY`**: `pi/models.json` tham chiếu qua biến môi trường `$NINE_ROUTER_KEY` (không chứa key thật). Trên máy mới cần set biến môi trường này, ví dụ thêm vào `~/.bashrc`:
+- **pi auth**: log in again after restoring (run `pi` and login), or manage auth yourself.
+- **`NINE_ROUTER_KEY`**: `pi/models.json` references the key via the `$NINE_ROUTER_KEY` environment variable (no real key in the file). On a new machine set it, e.g. in `~/.bashrc`:
 
   ```bash
-  export NINE_ROUTER_KEY="<key-của-bạn>"
+  export NINE_ROUTER_KEY="<your-key>"
   ```
 
-- **`daemon-keypair.json`**: Paseo tự sinh keypair mới khi chạy daemon lần đầu — không cần restore.
+- **`daemon-keypair.json`**: Paseo generates a fresh keypair on first daemon start — no restore needed.
 
-## 📤 Backup (máy cũ)
+## Backup (old machine)
+
+Requires [Bun](https://bun.sh) (works on Windows, Linux, macOS).
 
 ```bash
 git clone https://github.com/hypnguyen1209/piseo-config.git
 cd piseo-config
-bash scripts/backup.sh          # copy config máy hiện tại vào repo
-git add -A
-git commit -m "backup $(date +%F)"
-git push
+bun scripts/backup.ts          # copy current machine's configs into the repo
+git add -A && git commit -m "backup" && git push
 ```
 
-> Windows: dùng **Git Bash** để chạy script.
+Or do everything in one step:
 
-## 📥 Restore (máy mới)
+```bash
+bun scripts/backup.ts --push   # copy + commit + push
+```
 
-1. Cài đặt môi trường:
-   - [Git](https://git-scm.com/) + Git Bash (Windows)
-   - [pi coding agent](https://github.com/earendil-works/pi-coding-agent) (`npm i -g @earendil-works/pi-coding-agent` hoặc theo docs)
+## Restore (new machine)
+
+1. Install the environment:
+   - [Bun](https://bun.sh) + [Git](https://git-scm.com/) (on Windows: Git Bash)
+   - [pi coding agent](https://github.com/earendil-works/pi-coding-agent)
    - [Paseo desktop](https://paseo.sh)
 
-2. Restore config:
+2. Restore configs:
 
    ```bash
    git clone https://github.com/hypnguyen1209/piseo-config.git
    cd piseo-config
-   bash scripts/restore.sh
+   bun scripts/restore.ts
    ```
 
-3. Hoàn tất thủ công:
-   - Set `export NINE_ROUTER_KEY="<key>"` (xem [Bảo mật](#-bảo-mật)).
-   - Mở `pi` — nó tự cài lại toàn bộ plugins `@pify/*` từ `pi/settings.json`.
-   - Đăng nhập lại pi (auth) nếu cần.
-   - Mở Paseo desktop — daemon tự sinh `daemon-keypair.json` mới.
+3. Finish manually:
+   - Set `export NINE_ROUTER_KEY="<key>"` (see [Security](#security)).
+   - Open `pi` — plugins are already in place; run `bun install` inside `~/.pi/agent/npm` only if you want to refresh them.
+   - Log in to pi again if needed.
+   - Open Paseo desktop — it generates a new `daemon-keypair.json` automatically.
 
-## Cập nhật backup định kỳ
+## Keeping the backup up to date
 
-Chạy lại `bash scripts/backup.sh` + commit/push mỗi khi thay đổi config (thêm plugin, sửa models...). Script chỉ copy đè file có thay đổi nên an toàn để chạy nhiều lần.
+Whenever you change config (add a plugin, edit models, ...):
+
+```bash
+bun scripts/backup.ts --push
+```
+
+The script only overwrites files that exist, so it is safe to run repeatedly. Commit diff before pushing if you want to review changes.
