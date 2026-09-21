@@ -1,0 +1,54 @@
+# CI gate for piseo-config: JSON configs must parse, and a fresh clone must
+# restore cleanly on a cold runner — byte-for-byte what a new machine gets.
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-json:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+      - name: Every committed JSON config must parse
+        run: |
+          fail=0
+          for f in pi/*.json paseo/*.json; do
+            echo "checking $f"
+            bun -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"))' "$f" || fail=1
+          done
+          exit $fail
+
+  restore-smoke:
+    # Fresh clone on a cold CI runner = exactly what a new machine clones.
+    # If restore fails or the packages tree is incomplete here, it fails there.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+      - name: Run restore against a cold HOME
+        run: bun scripts/restore.ts
+      - name: Restored pi tree must be complete
+        run: |
+          test -f ~/.pi/agent/settings.json
+          test -f ~/.pi/agent/models.json
+          test -f ~/.pi/agent/models-store.json
+          test -f ~/.pi/agent/npm/package.json
+          test -f ~/.pi/agent/npm/package-lock.json
+          test -d ~/.pi/agent/npm/node_modules/@pify
+          count="$(ls ~/.pi/agent/npm/node_modules/@pify | wc -l)"
+          echo "@pify packages: $count"
+          [ "$count" -eq 20 ]
+      - name: Paseo configs must be restored
+        run: |
+          test -f ~/.paseo/config.json
+          test -f ~/.paseo/projects/projects.json
+      - name: npm lockfile must match package.json (drift check)
+        run: npm ci --dry-run --prefix ~/.pi/agent/npm

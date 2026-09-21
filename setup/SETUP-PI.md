@@ -1,0 +1,77 @@
+# SETUP-PI — Install pi from scratch using this backup (Windows / Linux / macOS)
+
+Agent-facing guide. Do these steps in order; each one is required.
+
+## 1. Prerequisites
+
+- [Git](https://git-scm.com/) (on Windows this also provides Git Bash)
+- [Bun](https://bun.sh):
+  ```bash
+  # macOS / Linux
+  curl -fsSL https://bun.sh/install | bash
+  ```
+  ```powershell
+  # Windows (PowerShell)
+  irm bun.sh/install.ps1 | iex
+  ```
+- Node.js + npm (needed to install the pi CLI itself): https://nodejs.org
+
+## 2. Install the pi CLI
+
+```bash
+npm i -g @earendil-works/pi-coding-agent
+```
+
+## 3. Restore configs from this repo
+
+```bash
+git clone https://github.com/hypnguyen1209/piseo-config.git
+cd piseo-config
+bun scripts/restore.ts
+```
+
+This writes:
+
+| Repo file | Live location |
+|---|---|
+| `pi/settings.json` | `~/.pi/agent/settings.json` |
+| `pi/models.json` | `~/.pi/agent/models.json` |
+| `pi/models-store.json` | `~/.pi/agent/models-store.json` |
+| `pi/packages/` | `~/.pi/agent/npm/` (full plugin packages, incl. `node_modules`) |
+
+## 4. Secrets (NOT in the repo — do manually)
+
+1. **`NINE_ROUTER_KEY`** — `pi/models.json` references it as `$NINE_ROUTER_KEY`:
+   ```bash
+   # bash: add to ~/.bashrc / ~/.zshrc
+   export NINE_ROUTER_KEY="<your-key>"
+   ```
+   ```powershell
+   # Windows (persistent)
+   setx NINE_ROUTER_KEY "<your-key>"
+   ```
+2. **pi auth** — start `pi` and log in again (`~/.pi/agent/auth.json` is intentionally not backed up).
+
+## 5. Verify
+
+```bash
+pi
+```
+
+- Plugins load from `~/.pi/agent/npm/node_modules/@pify` (20 packages — `ls` it to confirm).
+- `/model` shows the 9Router models from `pi/models.json` (default: `openrouter/z-ai/glm-5.3-flash`).
+- If plugins are missing or stale, refresh in place:
+  ```bash
+  cd ~/.pi/agent/npm && bun install
+  ```
+
+## 6. Going the other way (backup)
+
+After changing config/plugins on this machine:
+
+```bash
+cd piseo-config
+bun scripts/backup.ts --push
+```
+
+The script deletes `pi/packages/.gitignore` after copying — the source npm folder ships an ignore-all `.gitignore` that would otherwise keep `node_modules` out of the commit.

@@ -1,28 +1,36 @@
 # piseo-config
 
-Backup of my full **pi coding agent** setup (config + plugins/packages + models list) and **Paseo** (config), so I can restore everything on a new machine.
+[![ci](https://github.com/hypnguyen1209/piseo-config/actions/workflows/ci.yml/badge.svg)](https://github.com/hypnguyen1209/piseo-config/actions/workflows/ci.yml)
 
-> ⚠️ **This repo contains NO secrets** (no API keys, no keypairs). See [Security](#security).
+> **⚠️ Secret-free repo:** contains **NO** API keys or keypairs (`auth.json`, `daemon-keypair.json` are deliberately excluded). Repo is public — keep it that way. See [Security](#security).
+
+Backup of a full **pi coding agent** setup (config + plugins/packages + models list) and **Paseo** (config), restorable on any machine (Windows / Linux / macOS).
+
+- **Fresh machine, from zero?** Read [`setup/SETUP-PI.md`](setup/SETUP-PI.md) then [`setup/SETUP-PASEO.md`](setup/SETUP-PASEO.md) — agent-facing, step-by-step.
+- **Just syncing config changes?** Use [`scripts/backup.ts`](scripts/backup.ts) / [`scripts/restore.ts`](scripts/restore.ts) (Bun).
 
 ## Repository structure
 
 ```
 piseo-config/
 ├── README.md
+├── setup/
+│   ├── SETUP-PI.md            # install-from-scratch guide: pi side (cross-OS)
+│   └── SETUP-PASEO.md         # install-from-scratch guide: Paseo side (cross-OS)
 ├── scripts/
-│   ├── backup.ts          # Copy configs from this machine into the repo (bun)
-│   └── restore.ts         # Restore configs from the repo onto this machine (bun)
-├── pi/                    # ~/.pi/agent/
-│   ├── settings.json      # Main config (theme, default provider/model, package list)
-│   ├── models.json        # Custom providers & models (9Router, OpenRouter, ...)
-│   ├── models-store.json  # pi models store
-│   └── packages/          # FULL plugin packages (npm project: package.json + node_modules)
-│                          # = ~/.pi/agent/npm (20 @pify/* plugins, committed as-is)
+│   ├── backup.ts              # copy configs from this machine into the repo (bun)
+│   └── restore.ts             # restore configs from the repo onto this machine (bun)
+├── pi/                        # ~/.pi/agent/
+│   ├── settings.json          # main config (theme, default provider/model, package list)
+│   ├── models.json            # custom providers & models (9Router, OpenRouter, ...)
+│   ├── models-store.json      # pi models store
+│   └── packages/              # FULL plugin packages as an npm project (package.json +
+│                              #   lockfile + node_modules, 20 @pify/* plugins) = ~/.pi/agent/npm
 └── paseo/
-    ├── config.json              # ~/.paseo/config.json (daemon config)
-    ├── projects.json            # ~/.paseo/projects/projects.json
-    ├── workspaces.json          # ~/.paseo/projects/workspaces.json
-    └── desktop-settings.json    # Paseo desktop app settings
+    ├── config.json            # ~/.paseo/config.json (daemon config)
+    ├── projects.json          # ~/.paseo/projects/projects.json
+    ├── workspaces.json        # ~/.paseo/projects/workspaces.json
+    └── desktop-settings.json  # Paseo desktop app settings
 ```
 
 ## What is backed up
@@ -30,14 +38,14 @@ piseo-config/
 **pi**
 - `settings.json` — theme, default provider/model, package list.
 - `models.json` / `models-store.json` — all custom providers and models (9Router local proxy, OpenRouter, CMC, MiniMax, ...).
-- `packages/` — the **actual installed plugins**, committed as a full npm project (`~/.pi/agent/npm`): `package.json`, lockfile and `node_modules` with all 20 `@pify/*` packages (~2.4 MB). Restoring is instant — no reinstall needed. If you prefer a fresh install instead, run `bun install` (or `npm install`) inside the restored `npm` folder.
+- `packages/` — the **actual installed plugins**, committed as a full npm project: `package.json`, lockfile and `node_modules` with all 20 `@pify/*` packages (~2.4 MB). Restore is instant — no reinstall. To refresh instead: `cd ~/.pi/agent/npm && bun install`.
 
 **paseo**
 - `config.json` — daemon listen address, CORS, relay settings.
 - `projects.json` / `workspaces.json` — known projects & workspaces.
 - `desktop-settings.json` — desktop app settings (release channel, notifications, ...).
 
-> Note: Paseo has no separate plugin/extension store of its own — its agent plugins are the pi packages above.
+> Note: Paseo has no separate plugin/extension store — its agent plugins are the pi packages above.
 
 ## Intentionally excluded
 
@@ -51,61 +59,29 @@ piseo-config/
 
 ## Security
 
-The repo is **public**, so it must stay secret-free:
-
-- **pi auth**: log in again after restoring (run `pi` and login), or manage auth yourself.
-- **`NINE_ROUTER_KEY`**: `pi/models.json` references the key via the `$NINE_ROUTER_KEY` environment variable (no real key in the file). On a new machine set it, e.g. in `~/.bashrc`:
-
+- **pi auth**: log in again after restoring (see [`setup/SETUP-PI.md`](setup/SETUP-PI.md#4-secrets-not-in-the-repo--do-manually)).
+- **`NINE_ROUTER_KEY`**: `pi/models.json` references the key via the `$NINE_ROUTER_KEY` environment variable (no real key committed). Set it on each machine:
   ```bash
-  export NINE_ROUTER_KEY="<your-key>"
+  export NINE_ROUTER_KEY="<your-key>"        # bash
+  setx NINE_ROUTER_KEY "<your-key>"          # Windows (persistent)
   ```
-
 - **`daemon-keypair.json`**: Paseo generates a fresh keypair on first daemon start — no restore needed.
 
-## Backup (old machine)
+## CI
 
-Requires [Bun](https://bun.sh) (works on Windows, Linux, macOS).
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) gates every push/PR:
 
-```bash
-git clone https://github.com/hypnguyen1209/piseo-config.git
-cd piseo-config
-bun scripts/backup.ts          # copy current machine's configs into the repo
-git add -A && git commit -m "backup" && git push
-```
+- **validate-json** — every committed JSON config must parse.
+- **restore-smoke** — fresh clone on a cold runner, run `bun scripts/restore.ts`, verify the restored tree is complete (20 `@pify` packages, config files in place) and the npm lockfile matches `package.json`.
 
-Or do everything in one step:
+## Quick reference
 
 ```bash
-bun scripts/backup.ts --push   # copy + commit + push
-```
-
-## Restore (new machine)
-
-1. Install the environment:
-   - [Bun](https://bun.sh) + [Git](https://git-scm.com/) (on Windows: Git Bash)
-   - [pi coding agent](https://github.com/earendil-works/pi-coding-agent)
-   - [Paseo desktop](https://paseo.sh)
-
-2. Restore configs:
-
-   ```bash
-   git clone https://github.com/hypnguyen1209/piseo-config.git
-   cd piseo-config
-   bun scripts/restore.ts
-   ```
-
-3. Finish manually:
-   - Set `export NINE_ROUTER_KEY="<key>"` (see [Security](#security)).
-   - Open `pi` — plugins are already in place; run `bun install` inside `~/.pi/agent/npm` only if you want to refresh them.
-   - Log in to pi again if needed.
-   - Open Paseo desktop — it generates a new `daemon-keypair.json` automatically.
-
-## Keeping the backup up to date
-
-Whenever you change config (add a plugin, edit models, ...):
-
-```bash
+# backup this machine → repo (copies, commits, pushes)
 bun scripts/backup.ts --push
+
+# restore repo → this machine
+bun scripts/restore.ts
 ```
 
-The script only overwrites files that exist, so it is safe to run repeatedly. Commit diff before pushing if you want to review changes.
+`backup.ts` deletes `pi/packages/.gitignore` after copying — the source npm folder ships an ignore-all `.gitignore` that would otherwise keep `node_modules` out of the commit.
