@@ -64,3 +64,6 @@
 [submodule "pi/packages/pi-web-access"]
 	path = pi/packages/pi-web-access
 	url = https://github.com/nicobailon/pi-web-access.git
+[submodule "pi/packages/pi-observational-memory"]
+	path = pi/packages/pi-observational-memory
+	url = https://github.com/elpapi42/pi-observational-memory

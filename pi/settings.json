@@ -21,7 +21,8 @@
     "npm:@pify/workflow",
     "npm:@pify/worktree",
     "npm:pi-mcp-adapter",
-    "npm:pi-web-access"
+    "npm:pi-web-access",
+    "npm:pi-observational-memory"
   ],
   "lastChangelogVersion": "0.86.1",
   "theme": "dark",

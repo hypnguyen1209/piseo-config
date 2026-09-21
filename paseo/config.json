@@ -13,5 +13,15 @@
   },
   "app": {
     "baseUrl": "https://app.paseo.sh"
+  },
+  "agents": {
+    "providers": {
+      "pi": {
+        "command": [
+          "C:/Users/Administrator/AppData/Local/Author Software/nvm/installs/v24.21.0/node.exe",
+          "C:/Users/Administrator/AppData/Local/Author Software/nvm/installs/v24.21.0/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js"
+        ]
+      }
+    }
   }
 }

@@ -54,7 +54,7 @@ console.log(`\n${ok}/${mappings.length} items copied.`);
 if (process.argv.includes("--push")) {
   const msg = `backup ${new Date().toISOString().slice(0, 10)}`;
   const run = (cmd: string, args: string[]) => {
-    const r = Bun.spawnSync(cmd, args, { cwd: repoDir, stdout: "inherit", stderr: "inherit" });
+    const r = Bun.spawnSync([cmd, ...args], { cwd: repoDir, stdout: "inherit", stderr: "inherit" });
     if (r.exitCode !== 0) throw new Error(`${cmd} ${args.join(" ")} failed`);
   };
   run("git", ["add", "-A"]);

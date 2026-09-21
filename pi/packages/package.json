@@ -23,6 +23,7 @@
     "@pify/worktree": "^0.4.0",
     "@pify/yolo": "^0.12.0",
     "pi-mcp-adapter": "^2.34.0",
+    "pi-observational-memory": "^3.1.4",
     "pi-web-access": "^0.30.0"
   }
 }
