@@ -4,7 +4,7 @@
  * Run:  bun scripts/backup.ts [--push]
  *   --push : also stage, commit and push automatically
  */
-import { cpSync, existsSync, statSync } from "node:fs";
+import { cpSync, existsSync, rmSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { homedir, platform } from "node:os";
 
@@ -38,6 +38,10 @@ for (const [src, dest] of mappings) {
     continue;
   }
   cpSync(src, dest, { recursive: true, force: true });
+  // The source npm folder ships its own ignore-all .gitignore which would
+  // prevent node_modules from being committed — drop it from the repo copy.
+  const innerGitignore = join(dest, ".gitignore");
+  if (statSync(src).isDirectory() && existsSync(innerGitignore)) rmSync(innerGitignore);
   const kind = statSync(src).isDirectory() ? "dir " : "file";
   console.log(`  ✓ [${kind}] ${src} -> ${dest.replace(repoDir + "\\", "").replace(repoDir + "/", "")}`);
   ok++;

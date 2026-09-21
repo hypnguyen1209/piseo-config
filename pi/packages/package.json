@@ -1,0 +1,26 @@
+{
+  "name": "pi-extensions",
+  "private": true,
+  "dependencies": {
+    "@pify/ask-question": "^0.5.0",
+    "@pify/autopilot": "^0.2.0",
+    "@pify/btw": "^0.4.0",
+    "@pify/compact": "^0.4.1",
+    "@pify/goal": "^0.7.0",
+    "@pify/memory": "^0.10.0",
+    "@pify/plan-mode": "^0.5.0",
+    "@pify/pretty": "^0.12.0",
+    "@pify/recall": "^0.3.0",
+    "@pify/search": "^0.5.0",
+    "@pify/shell-background": "^0.2.0",
+    "@pify/skills": "^0.4.0",
+    "@pify/subagent": "^0.15.0",
+    "@pify/swarm": "^0.11.0",
+    "@pify/task": "^0.4.0",
+    "@pify/todo": "^0.3.0",
+    "@pify/usage": "^0.9.0",
+    "@pify/workflow": "^0.12.0",
+    "@pify/worktree": "^0.4.0",
+    "@pify/yolo": "^0.12.0"
+  }
+}
