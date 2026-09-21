@@ -34,8 +34,7 @@ jobs:
           echo "source submodules: $count | dependencies: $deps"
           [ "$count" -eq "$deps" ]
           for d in $(git config -f .gitmodules --list | grep '.path=' | cut -d= -f2); do
-            base="$(basename "$d")"
-            bun -e 'const [pkg, base] = process.argv.slice(1); const p = JSON.parse(require("fs").readFileSync(pkg, "utf8")); if (p.name !== base) { console.error("name mismatch:", p.name, "!=", base); process.exit(1) }' "$d/package.json" "$base" || exit 1
+            bun -e 'const [pkg, depsFile] = process.argv.slice(1); const name = JSON.parse(require("fs").readFileSync(pkg, "utf8")).name; const deps = Object.keys(JSON.parse(require("fs").readFileSync(depsFile, "utf8")).dependencies); if (!deps.includes(name)) { console.error("submodule not a dependency:", name); process.exit(1) }' "$d/package.json" pi/packages/package.json || exit 1
           done
 
   restore-smoke:
