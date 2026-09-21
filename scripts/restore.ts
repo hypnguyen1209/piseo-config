@@ -3,9 +3,9 @@
  * restore.ts — Restore configs from the repo onto THIS machine (new machine).
  * Run:  bun scripts/restore.ts
  *
- * Note: pi/packages/<name>/ are git submodules (pifydev plugin sources) kept
- * for reference/customization — restore only copies the npm-project bits
- * (package.json, lockfile, node_modules) to the live folder.
+ * Note: pi/packages/<name>/ are git submodules (plugin sources) kept for
+ * reference/customization — restore copies the npm manifest only and then
+ * reinstalls node_modules with bun (node_modules is not committed).
  */
 import { cpSync, existsSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -25,10 +25,9 @@ const mappings: Array<[string, string]> = [
   [join(repoDir, "pi", "settings.json"), join(home, ".pi", "agent", "settings.json")],
   [join(repoDir, "pi", "models.json"), join(home, ".pi", "agent", "models.json")],
   [join(repoDir, "pi", "models-store.json"), join(home, ".pi", "agent", "models-store.json")],
-  // pi packages — npm-project bits only; submodule sources stay in the repo
+  // pi packages — manifest only; node_modules is reinstalled below
   [join(repoDir, "pi", "packages", "package.json"), join(home, ".pi", "agent", "npm", "package.json")],
   [join(repoDir, "pi", "packages", "package-lock.json"), join(home, ".pi", "agent", "npm", "package-lock.json")],
-  [join(repoDir, "pi", "packages", "node_modules"), join(home, ".pi", "agent", "npm", "node_modules")],
   // paseo
   [join(repoDir, "paseo", "config.json"), join(home, ".paseo", "config.json")],
   [join(repoDir, "paseo", "projects.json"), join(home, ".paseo", "projects", "projects.json")],
@@ -49,6 +48,19 @@ for (const [src, dest] of mappings) {
   ok++;
 }
 console.log(`\n${ok}/${mappings.length} items restored.`);
+
+// Reinstall plugins from the lockfile (node_modules is not committed)
+const npmDir = join(home, ".pi", "agent", "npm");
+console.log(`\nInstalling plugins: bun install --frozen-lockfile (${npmDir})`);
+const install = Bun.spawnSync(["bun", "install", "--frozen-lockfile"], {
+  cwd: npmDir, stdout: "inherit", stderr: "inherit",
+});
+if (install.exitCode !== 0) {
+  console.error("bun install failed — run it manually in ~/.pi/agent/npm");
+  process.exitCode = 1;
+} else {
+  console.log("Plugins installed.");
+}
 
 console.log(`
 Finish manually (see README.md):

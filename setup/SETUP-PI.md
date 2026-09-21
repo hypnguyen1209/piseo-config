@@ -64,7 +64,7 @@ git submodule update --init
 pi
 ```
 
-- Plugins load from `~/.pi/agent/npm/node_modules/@pify` (20 packages — `ls` it to confirm).
+- Plugins load from `~/.pi/agent/npm/node_modules` (20 `@pify/*` + `pi-mcp-adapter` + `pi-web-access`; `ls ~/.pi/agent/npm/node_modules/@pify | wc -l` to confirm).
 - `/model` shows the 9Router models from `pi/models.json` (default: `openrouter/z-ai/glm-5.3-flash`).
 - If plugins are missing or stale, refresh in place:
   ```bash

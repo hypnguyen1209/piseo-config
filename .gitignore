@@ -8,3 +8,6 @@ auth.json
 daemon-keypair.json
 *.key
 *.pem
+
+# node_modules được cài lại bằng `bun install` từ package-lock.json
+pi/packages/node_modules/

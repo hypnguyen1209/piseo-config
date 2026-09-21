@@ -6,13 +6,14 @@ This folder is the npm project pi uses for its plugins (`~/.pi/agent/npm` on the
 pi/packages/
 ├── package.json          # npm project ("pi-extensions") — synced with ~/.pi/agent/npm
 ├── package-lock.json     # pins exact published versions — synced
-├── node_modules/         # COMMITTED working install (20 @pify/* packages) — synced
-└── <name>/               # git submodule of github.com/pifydev/<name> — REPO ONLY,
-                          #   pinned to the tag matching the installed version
-                          #   (todo @ v0.3.0, memory @ v0.10.0, ...). NOT synced.
+├── <name>/               # git submodule of the plugin's source repo (pifydev/<name>
+│                         #   or nicobailon/<name>), pinned to the tag matching the
+│                         #   installed version. REPO ONLY — not synced to live.
+└── node_modules/         # local working install — NOT committed; recreated by
+                          #   `bun install --frozen-lockfile` (restore.ts runs it)
 ```
 
-- `scripts/backup.ts` / `scripts/restore.ts` sync **only** `package.json`, `package-lock.json` and `node_modules` with the live folder. The submodule checkouts never leave this repo.
+- `scripts/backup.ts` / `scripts/restore.ts` sync **only** `package.json` + `package-lock.json` with the live folder. `node_modules` is rebuilt from the lockfile (`bun install`), and the submodule checkouts never leave this repo.
 - After cloning this repo on a new machine, materialize the sources:
 
   ```bash
@@ -42,8 +43,8 @@ Point the npm dependency at the local source instead of the registry, then reins
 ```bash
 cd pi/packages
 # package.json: "@pify/todo": "file:./todo"
-bun install
-cd scripts && bun backup.ts --push   # node_modules now contains your build
+bun install          # updates package-lock.json too — commit it
+cd scripts && bun backup.ts --push
 ```
 
 ## Updating pins

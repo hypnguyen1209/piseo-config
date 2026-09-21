@@ -19,7 +19,9 @@
     "npm:@pify/task",
     "npm:@pify/usage",
     "npm:@pify/workflow",
-    "npm:@pify/worktree"
+    "npm:@pify/worktree",
+    "npm:pi-mcp-adapter",
+    "npm:pi-web-access"
   ],
   "lastChangelogVersion": "0.86.1",
   "theme": "dark",

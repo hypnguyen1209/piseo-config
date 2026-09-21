@@ -8,7 +8,7 @@
       ]
     },
     "relay": {
-      "enabled": false
+      "enabled": true
     }
   },
   "app": {

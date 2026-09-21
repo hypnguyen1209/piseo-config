@@ -24,9 +24,9 @@ piseo-config/
 │   ├── settings.json          # main config (theme, default provider/model, package list)
 │   ├── models.json            # custom providers & models (9Router, OpenRouter, ...)
 │   ├── models-store.json      # pi models store
-│   └── packages/              # npm project (package.json + lockfile + committed
-│                              #   node_modules, 20 @pify/* plugins) = ~/.pi/agent/npm
-│                              #   + git submodules pi/packages/<name> = pifydev sources,
+│   └── packages/              # npm project (package.json + lockfile = ~/.pi/agent/npm;
+│                              #   node_modules NOT committed — restored via `bun install`)
+│                              #   + git submodules pi/packages/<name> = plugin sources
 │                              #   pinned to installed versions (repo-only) — see
 │                              #   pi/packages/README.md
 └── paseo/
@@ -41,7 +41,7 @@ piseo-config/
 **pi**
 - `settings.json` — theme, default provider/model, package list.
 - `models.json` / `models-store.json` — all custom providers and models (9Router local proxy, OpenRouter, CMC, MiniMax, ...).
-- `packages/` — the **actual installed plugins**, committed as a full npm project: `package.json`, lockfile and `node_modules` with all 20 `@pify/*` packages (~2.4 MB). Restore is instant — no reinstall. To refresh instead: `cd ~/.pi/agent/npm && bun install`.
+- `packages/` — the plugin set as an npm project: `package.json` + `package-lock.json` (22 plugins: 20 `@pify/*` + `pi-mcp-adapter` + `pi-web-access`). **`node_modules` is not committed** (~140 MB) — `restore.ts` runs `bun install --frozen-lockfile` to rebuild it exactly. Submodule sources below are excluded from that sync.
 - `packages/<name>/` — **git submodules** of `github.com/pifydev/<name>`, pinned to the tag matching each installed version. Source reference + customization playground; never synced to the live machine. See [`pi/packages/README.md`](pi/packages/README.md).
 
 **paseo**
@@ -75,8 +75,8 @@ piseo-config/
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) gates every push/PR:
 
-- **validate-json** — every committed JSON config must parse; all 20 plugin source submodules must be valid `@pify` packages.
-- **restore-smoke** — fresh clone on a cold runner, run `bun scripts/restore.ts`, verify the restored tree is complete (20 `@pify` packages, config files in place) and the npm lockfile matches `package.json`.
+- **validate-json** — every committed JSON config must parse; every plugin source submodule must be a valid package matching its dependency.
+- **restore-smoke** — fresh clone on a cold runner, run `bun scripts/restore.ts` (which reinstalls plugins from the lockfile), verify the restored tree is complete (20 `@pify` + `pi-mcp-adapter` + `pi-web-access`, config files in place).
 
 ## Quick reference
 
@@ -88,4 +88,4 @@ bun scripts/backup.ts --push
 bun scripts/restore.ts
 ```
 
-`backup.ts` / `restore.ts` sync only `package.json`, `package-lock.json` and `node_modules` with the live folder — the submodule sources stay repo-only.
+`backup.ts` / `restore.ts` sync only the npm manifest (`package.json` + lockfile) with the live folder — submodule sources stay repo-only, and `node_modules` is never committed (reinstalled from the lockfile).

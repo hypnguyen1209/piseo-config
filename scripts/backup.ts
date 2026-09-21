@@ -4,8 +4,10 @@
  * Run:  bun scripts/backup.ts [--push]
  *   --push : also stage, commit and push automatically
  *
- * Note: pi/packages/<name>/ are git submodules (pifydev sources) — they are
- * repo-only and are NEVER synced to or from the live ~/.pi/agent/npm folder.
+ * Note: pi/packages/<name>/ are git submodules (plugin sources) — repo-only,
+ * never synced to/from the live machine. node_modules is NOT committed:
+ * dependencies live in package.json + package-lock.json and are reinstalled
+ * with `bun install` (see restore.ts).
  */
 import { cpSync, existsSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -25,10 +27,9 @@ const mappings: Array<[string, string]> = [
   [join(home, ".pi", "agent", "settings.json"), join(repoDir, "pi", "settings.json")],
   [join(home, ".pi", "agent", "models.json"), join(repoDir, "pi", "models.json")],
   [join(home, ".pi", "agent", "models-store.json"), join(repoDir, "pi", "models-store.json")],
-  // pi packages — only the npm-project bits; submodule sources stay untouched
+  // pi packages — only the npm manifest; node_modules is reinstalled, not synced
   [join(home, ".pi", "agent", "npm", "package.json"), join(repoDir, "pi", "packages", "package.json")],
   [join(home, ".pi", "agent", "npm", "package-lock.json"), join(repoDir, "pi", "packages", "package-lock.json")],
-  [join(home, ".pi", "agent", "npm", "node_modules"), join(repoDir, "pi", "packages", "node_modules")],
   // paseo
   [join(home, ".paseo", "config.json"), join(repoDir, "paseo", "config.json")],
   [join(home, ".paseo", "projects", "projects.json"), join(repoDir, "paseo", "projects.json")],

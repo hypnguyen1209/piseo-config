@@ -58,3 +58,9 @@
 [submodule "pi/packages/yolo"]
 	path = pi/packages/yolo
 	url = https://github.com/pifydev/yolo.git
+[submodule "pi/packages/pi-mcp-adapter"]
+	path = pi/packages/pi-mcp-adapter
+	url = https://github.com/nicobailon/pi-mcp-adapter.git
+[submodule "pi/packages/pi-web-access"]
+	path = pi/packages/pi-web-access
+	url = https://github.com/nicobailon/pi-web-access.git
