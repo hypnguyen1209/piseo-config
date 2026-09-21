@@ -29,10 +29,10 @@ jobs:
           exit $fail
       - name: All 20 plugin source submodules must be valid @pify packages
         run: |
-          count="$(git config -f .gitmodules --get-regexp '\\.path$' | wc -l)"
+          count="$(git config -f .gitmodules --list | grep -c '\\.path=')"
           echo "source submodules: $count"
           [ "$count" -eq 20 ]
-          for d in $(git config -f .gitmodules --get-regexp '\\.path$' | awk '{print $2}'); do
+          for d in $(git config -f .gitmodules --list | grep '\\.path=' | cut -d= -f2); do
             bun -e 'const p=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); if(!p.name.startsWith("@pify/")) { console.error("bad name:", p.name); process.exit(1) }' "$d/package.json" || exit 1
           done
 
