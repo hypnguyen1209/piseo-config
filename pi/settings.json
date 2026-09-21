@@ -1,0 +1,28 @@
+{
+  "packages": [
+    "npm:@pify/todo",
+    "npm:@pify/plan-mode",
+    "npm:@pify/memory",
+    "npm:@pify/yolo",
+    "npm:@pify/ask-question",
+    "npm:@pify/autopilot",
+    "npm:@pify/btw",
+    "npm:@pify/compact",
+    "npm:@pify/goal",
+    "npm:@pify/pretty",
+    "npm:@pify/recall",
+    "npm:@pify/search",
+    "npm:@pify/shell-background",
+    "npm:@pify/skills",
+    "npm:@pify/subagent",
+    "npm:@pify/swarm",
+    "npm:@pify/task",
+    "npm:@pify/usage",
+    "npm:@pify/workflow",
+    "npm:@pify/worktree"
+  ],
+  "lastChangelogVersion": "0.86.1",
+  "theme": "dark",
+  "defaultProvider": "9router",
+  "defaultModel": "openrouter/z-ai/glm-5.3-flash"
+}

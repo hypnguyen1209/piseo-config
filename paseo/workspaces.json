@@ -1,0 +1,38 @@
+[
+  {
+    "workspaceId": "wks_e2a044826ce82ecc",
+    "projectId": "prj_7d732692bb15a4dd",
+    "cwd": "C:\\Users\\Administrator\\Documents\\project",
+    "kind": "directory",
+    "displayName": "project",
+    "title": "Acknowledge greeting",
+    "branch": null,
+    "worktreeRoot": null,
+    "baseBranch": null,
+    "isPaseoOwnedWorktree": false,
+    "mainRepoRoot": null,
+    "createdAt": "2026-09-21T03:51:22.106Z",
+    "updatedAt": "2026-09-21T03:51:28.197Z",
+    "archivedAt": null,
+    "autoArchivedChangeRequestUrl": null,
+    "pinnedAt": null
+  },
+  {
+    "workspaceId": "wks_ad59db5446b3251d",
+    "projectId": "prj_7d732692bb15a4dd",
+    "cwd": "C:\\Users\\Administrator\\Documents\\project",
+    "kind": "directory",
+    "displayName": "project",
+    "title": "Greet user and confirm intent",
+    "branch": null,
+    "worktreeRoot": null,
+    "baseBranch": null,
+    "isPaseoOwnedWorktree": false,
+    "mainRepoRoot": null,
+    "createdAt": "2026-09-21T05:16:26.693Z",
+    "updatedAt": "2026-09-21T05:16:32.002Z",
+    "archivedAt": null,
+    "autoArchivedChangeRequestUrl": null,
+    "pinnedAt": null
+  }
+]

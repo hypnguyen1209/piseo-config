@@ -1,0 +1,10 @@
+# OS junk
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Secrets — KHÔNG BAO GIỜ commit các file này
+auth.json
+daemon-keypair.json
+*.key
+*.pem
